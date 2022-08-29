@@ -41,6 +41,52 @@ module AjaxDatatablesRails
 
         private
 
+        def null_value_search
+          if formatted_value == NOT_NULL_VALUE
+            table[field].not_eq(nil)
+          else
+            table[field].eq(nil)
+          end
+        end
+
+        def raw_search(cond)
+          table[field].send(cond, formatted_value) unless custom_field?
+        end
+
+        def text_search(value)
+          casted_column(value) unless custom_field?
+        end
+
+        def empty_search
+          casted_column(EMPTY_VALUE)
+        end
+
+        def searchable_integer?
+          if formatted_value.is_a?(Array)
+            valids = formatted_value.map { |v| integer?(v) && !out_of_range?(v) }
+            !valids.include?(false)
+          else
+            integer?(formatted_value) && !out_of_range?(formatted_value)
+          end
+        end
+
+        def out_of_range?(search_value)
+          Integer(search_value) > LARGEST_PQ_INTEGER || Integer(search_value) < SMALLEST_PQ_INTEGER
+        end
+
+        def integer?(string)
+          Integer(string)
+          true
+        rescue ArgumentError
+          false
+        end
+
+      end
+
+      module ActiveRecordSearch
+
+        private
+
         # Using multi-select filters in JQuery Datatable auto-enables regex_search.
         # Unfortunately regex_search doesn't work when filtering on primary keys with integer.
         # It generates this kind of query : AND ("regions"."id" ~ '2|3') which throws an error :
@@ -78,47 +124,48 @@ module AjaxDatatablesRails
           end
         end
         # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity
+      end
 
-        def null_value_search
-          if formatted_value == NOT_NULL_VALUE
-            table[field].not_eq(nil)
+      module ActiveModelSearch
+        private
+
+        # Using multi-select filters in JQuery Datatable auto-enables regex_search.
+        # Unfortunately regex_search doesn't work when filtering on primary keys with integer.
+        # It generates this kind of query : AND ("regions"."id" ~ '2|3') which throws an error :
+        # operator doesn't exist : integer ~ unknown
+        # The solution is to bypass regex_search and use non_regex_search with :in operator
+        def regex_search
+          if use_regex?
+            { field => { '$regex' => Regexp.new(formatted_value, Regexp::IGNORECASE) } }
           else
-            table[field].eq(nil)
+            non_regex_search
           end
         end
 
-        def raw_search(cond)
-          table[field].send(cond, formatted_value) unless custom_field?
-        end
-
-        def text_search(value)
-          casted_column.matches(value) unless custom_field?
-        end
-
-        def empty_search
-          casted_column.matches(EMPTY_VALUE)
-        end
-
-        def searchable_integer?
-          if formatted_value.is_a?(Array)
-            valids = formatted_value.map { |v| integer?(v) && !out_of_range?(v) }
-            !valids.include?(false)
-          else
-            integer?(formatted_value) && !out_of_range?(formatted_value)
+        # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity
+        def non_regex_search
+          case cond
+          when Proc
+            filter
+          when :eq, :not_eq, :lt, :gt, :lteq, :gteq, :in
+            searchable_integer? ? raw_search(cond) : empty_search
+          when :start_with
+            text_search(formatted_value)
+          when :end_with
+            text_search(formatted_value)
+          when :like
+            text_search(formatted_value)
+          when :string_eq
+            raw_search(:eq)
+          when :string_in
+            raw_search(:in)
+          when :null_value
+            null_value_search
+          when :date_range
+            date_range_search
           end
         end
-
-        def out_of_range?(search_value)
-          Integer(search_value) > LARGEST_PQ_INTEGER || Integer(search_value) < SMALLEST_PQ_INTEGER
-        end
-
-        def integer?(string)
-          Integer(string)
-          true
-        rescue ArgumentError
-          false
-        end
-
+        # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity
       end
     end
   end

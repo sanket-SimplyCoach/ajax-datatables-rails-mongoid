@@ -39,8 +39,15 @@ module AjaxDatatablesRails
       # ----------------- COLUMN METHODS --------------------
 
       def columns
-        @columns ||= get_param(:columns).map do |index, column_options|
-          Column.new(@datatable, index, column_options)
+        case @datatable.db_adapter
+        when :mongoid
+          @columns ||= get_param(:columns).map do |index, column_options|
+            ActiveModelColumn.new(@datatable, index, column_options)
+          end
+        else
+          @columns ||= get_param(:columns).map do |index, column_options|
+            ActiveRecordColumn.new(@datatable, index, column_options)
+          end
         end
       end
 

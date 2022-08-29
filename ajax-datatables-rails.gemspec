@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'zeitwerk'
 
   s.add_development_dependency 'activerecord-oracle_enhanced-adapter'
+  # s.add_development_dependency 'mongoid'
   s.add_development_dependency 'appraisal'
   s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'factory_bot'

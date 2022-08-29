@@ -15,7 +15,7 @@ module AjaxDatatablesRails
       end
 
       def regexp?
-        @options[:regex] == TRUE_VALUE
+        @options[:regex].to_s == TRUE_VALUE
       end
 
     end

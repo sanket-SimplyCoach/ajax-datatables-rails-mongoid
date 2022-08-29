@@ -17,6 +17,11 @@ module Rails
         datatable_path.classify
       end
 
+      def adapter_name
+        defined?(::ActiveRecord) ? 'ActiveRecord' : 'ActiveModel'
+      end
+
+
       private
 
       def datatable_path

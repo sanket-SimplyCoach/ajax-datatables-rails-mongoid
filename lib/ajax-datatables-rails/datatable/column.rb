@@ -86,10 +86,6 @@ module AjaxDatatablesRails
         @type_cast ||= DB_ADAPTER_TYPE_CAST.fetch(datatable.db_adapter, TYPE_CAST_DEFAULT)
       end
 
-      def casted_column
-        @casted_column ||= ::Arel::Nodes::NamedFunction.new('CAST', [table[field].as(type_cast)])
-      end
-
       def validate_settings!
         raise AjaxDatatablesRails::Error::InvalidSearchColumn, "Unknown column. Check that `data` field is filled on JS side with the column name" if column_name.empty?
         raise AjaxDatatablesRails::Error::InvalidSearchColumn, "Check that column '#{column_name}' exists in view_columns" unless valid_search_column?(column_name)
