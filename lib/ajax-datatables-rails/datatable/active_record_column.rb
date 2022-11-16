@@ -1,6 +1,6 @@
 module AjaxDatatablesRails
   module Datatable
-    class ActiveModelColumn < Column
+    class ActiveRecordColumn < Column
 
       include ActiveRecordSearch
       include ActiveRecordOrder
