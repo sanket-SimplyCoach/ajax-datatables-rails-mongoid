@@ -136,7 +136,7 @@ module AjaxDatatablesRails
         # The solution is to bypass regex_search and use non_regex_search with :in operator
         def regex_search
           if use_regex?
-            { field => { '$regex' => Regexp.new(formatted_value, Regexp::IGNORECASE) } }
+            { field => { '$regex' => Regexp.new(Regexp.escape(formatted_value), Regexp::IGNORECASE) } }
           else
             non_regex_search
           end

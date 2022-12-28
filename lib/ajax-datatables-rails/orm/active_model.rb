@@ -56,9 +56,10 @@ module AjaxDatatablesRails
             simple_column.search = search
             simple_column.search_query
           end
-          { '$or' => crit.flatten }
         end.compact
-        criteria
+
+        { '$or' => criteria.flatten }
+        # criteria
       end
       # rubocop:enable Metrics/AbcSize
 
