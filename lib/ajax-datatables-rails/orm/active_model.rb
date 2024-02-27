@@ -28,6 +28,8 @@ module AjaxDatatablesRails
           queries << order.query(column.sort_query) if column && column.orderable?
           queries
         end
+        # For Mongo Sort Uniq column is require in sorting.
+        sort_by << "id #{Datatable::SimpleOrder::DIRECTION_ASC}"
         records.order(sort_by.join(', '))
       end
       # rubocop:enable Style/EachWithObject, Style/SafeNavigation
