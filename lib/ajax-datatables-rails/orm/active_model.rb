@@ -60,7 +60,9 @@ module AjaxDatatablesRails
           end
         end.compact
 
-        { '$or' => criteria.flatten }
+        criteria.flatten!
+
+        criteria.blank? ? {} : { '$or' => criteria }
         # criteria
       end
       # rubocop:enable Metrics/AbcSize
@@ -70,7 +72,8 @@ module AjaxDatatablesRails
       end
 
       def search_for
-        datatable.search.value.split(global_search_delimiter)
+        _value = datatable.search.value.as_json
+        _value.is_a?(String) ? datatable.search.value.to_s.split(global_search_delimiter) : ['']
       end
 
     end
