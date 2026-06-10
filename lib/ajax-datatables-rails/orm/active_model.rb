@@ -58,12 +58,11 @@ module AjaxDatatablesRails
             simple_column.search = search
             simple_column.search_query
           end
+          crit
         end.compact
 
         criteria.flatten!
-
         criteria.blank? ? {} : { '$or' => criteria }
-        # criteria
       end
       # rubocop:enable Metrics/AbcSize
 
@@ -73,7 +72,8 @@ module AjaxDatatablesRails
 
       def search_for
         _value = datatable.search.value.as_json
-        _value.is_a?(String) ? datatable.search.value.to_s.split(global_search_delimiter) : ['']
+        datatable.search.regex = true unless _value.is_a?(String)
+        datatable.search.value.to_s.split(global_search_delimiter)
       end
 
     end

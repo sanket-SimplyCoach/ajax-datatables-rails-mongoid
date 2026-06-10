@@ -18,6 +18,10 @@ module AjaxDatatablesRails
         @options[:regex].to_s == TRUE_VALUE
       end
 
+      def regex=_regex
+        @options[:regex] = _regex
+      end
+
     end
   end
 end
